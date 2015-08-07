@@ -1,0 +1,101 @@
+<html>
+<head>
+	<title>My Twitter Pics</title>
+
+	<script type="text/javascript">
+	Grailbird = {};
+	Grailbird.data = {};
+	</script>
+
+	<script src="data/js/tweet_index.js"></script>
+	<script src="data/js/user_details.js"></script>
+
+	<script type="text/javascript">
+
+	function startLoading()
+	{
+		var fileref;
+		var filename;
+		var monthsLoaded = 0;
+		for (var i =0; i < tweet_index.length;i++)
+		{	
+			filename = tweet_index[i].file_name;
+			fileref = document.createElement('script')
+	        fileref.setAttribute("type","text/javascript")
+	        fileref.setAttribute("src", filename);
+	        fileref.onload =function(){
+	        	monthsLoaded++;
+	        	if (monthsLoaded >= tweet_index.length)
+	        	{
+	        		console.log('loded')
+	        		getPictures();
+	        	}
+	        };
+	        document.getElementsByTagName("head")[0].appendChild(fileref)
+		}
+	}
+
+	function getPictures()
+	{
+
+		var userId = parseInt(user_details.id); //Set you user id HERE!
+
+		var monthData;
+		var ml;
+		var media;
+		var tweet;
+		var urlStr = '';
+
+		for(var month in Grailbird.data)
+		{
+			monthData = Grailbird.data[month];
+			ml = monthData.length;
+			//Iterate monthly tweet
+			for (var i = 0; i < ml; i++ )
+			{	
+				//Tweet object
+				tweet = monthData[i];
+
+				if(tweet.retweeted_status) continue;
+				if(tweet.user.id != userId) continue; // Only my tweets, not retweets
+				if(tweet.entities.media.length == 0) continue; //No images
+
+				for(var m = 0; m < tweet.entities.media.length; m++)
+				{
+					media = tweet.entities.media[m];
+					urlStr += media.media_url + '\n';
+				}
+
+			}
+		}
+		document.getElementById('result').value = urlStr;
+		document.getElementById('result').style.display = 'block';
+		document.getElementById('loader').style.display = 'none';
+	}
+
+	</script>
+</head>
+<body>
+	<div style="font-size:16px;color:#444;font-family:Arial;width:800px;line-height:26px;">
+		<p>Нажмите кнопку начать, и все изображения из ваших твитов будут предаставлены в виде списка ссылок на файлы. C помощью это списка вы сможете легко скачть их, используя любую доступную утилиты. На пример для Линукс воспользуемся <em>wget</em>. Cоздайте папку, где буду хранится ваши изображения, откройте терминал и перейдите в нее. Далее создайте файл <em>tweets.txt</em>, и выполните команду
+		<p>
+		
+		<code style="padding:10px;background:#ddf;margin:10px 0;">wget -i tweets.txt</code>
+		<p>
+		Утилита используя список файлов загрузит их все в текущую директорию
+		</p>
+	<div>	
+	
+	<button id="start" style="background:orange; font-family:Arial; font-size:20px;padding:10px 20px; border:none; border-radius:10px;cursor:pointer;margin:20px 0;">Я понял, начать уже!</button>
+	<br/>
+	<div id="loader" style="display:none;font-family:Arial;color:#666;font-style:italic;font-size:16px;">Загружаются твиты, подождите...</div>
+	<textarea id="result" style="display:none;width:90%;height:90%"></textarea>
+
+	<script>
+	document.getElementById('start').addEventListener('click',function(){
+			document.getElementById('loader').style.display = 'block';
+			startLoading();
+		});
+	</script>
+</body>
+</html>
